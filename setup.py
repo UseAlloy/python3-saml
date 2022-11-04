@@ -44,7 +44,7 @@ setup(
         "saml2/schemas": ["*.xsd"],
     },
     package_dir={
-        "": "src",
+        "": "saml2",
     },
     test_suite="tests",
     install_requires=requirements,
