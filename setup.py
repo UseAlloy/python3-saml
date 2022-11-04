@@ -43,9 +43,6 @@ setup(
     package_data={
         "saml2/schemas": ["*.xsd"],
     },
-    package_dir={
-        "": "saml2",
-    },
     test_suite="tests",
     install_requires=requirements,
     dependency_links=["http://github.com/mehcode/python-xmlsec/tarball/master"],
