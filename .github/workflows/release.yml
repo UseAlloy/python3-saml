@@ -1,0 +1,86 @@
+name: Wheel build
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  Linux:
+    runs-on: ubuntu-latest
+
+    strategy:
+      # Allows for matrix sub-jobs to fail without canceling the rest
+      fail-fast: false
+
+      matrix:
+        image:
+          - manylinux_2_24_x86_64
+          - manylinux_2_24_i686
+          - manylinux_2_24_aarch64
+          - manylinux_2_28_x86_64
+          - manylinux_2_28_aarch64
+        python_version: ["3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python_version }}
+
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel
+
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir wheelhouse
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ./wheelhouse/*.whl
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels-${{ matrix.image }}
+          path: ./wheelhouse/*.whl
+          if-no-files-found: ignore
+
+  non-Linux:
+    strategy:
+      # Allows for matrix sub-jobs to fail without canceling the rest
+      fail-fast: false
+
+      matrix:
+        os: [macos-11]
+        python_version: ["3.9", "3.10", "3.11"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python_version }}
+
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel
+
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir wheelhouse
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ./wheelhouse/*.whl
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels-${{ matrix.image }}
+          path: ./wheelhouse/*.whl
+          if-no-files-found: ignore
