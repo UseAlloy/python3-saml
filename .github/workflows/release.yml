@@ -8,19 +8,12 @@ jobs:
   Linux:
     runs-on: ubuntu-latest
 
-    strategy:
-      # Allows for matrix sub-jobs to fail without canceling the rest
-      fail-fast: false
-
-      matrix:
-        python_version: ["3.9", "3.10", "3.11"]
-
     steps:
       - uses: actions/checkout@v2
 
       - uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python_version }}
+          python-version: 3.11
           cache: "pip"
 
       - name: Install dependencies
@@ -29,7 +22,7 @@ jobs:
           sudo apt-get install libxml2-dev libxmlsec1-dev libxslt-dev python-dev
 
       - name: Build wheels
-        run: python -m pip build -w ./wheelhouse .
+        run: python -m build --wheel --outdir ./wheelhouse
 
       - name: Release
         uses: softprops/action-gh-release@v1
